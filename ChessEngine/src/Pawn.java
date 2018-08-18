@@ -165,16 +165,16 @@ class Pawn extends Piece {
                 if (tempPoint.getRank() == 1 || tempPoint.getRank() == 8) {
                     Move move = new Move(from, tempPoint);
                     ChessBoard b2 = b.applyMove(move);
-                    if (b2.isPositionLegal()) {
+//                    if (b2.isPositionLegal()) {
                         v.add(move);
-                    }
+//                    }
 
                 } else {
                     Move move = new Move(from, tempPoint);
                     ChessBoard b2 = b.applyMove(move);
-                    if (b2.isPositionLegal()) {
+//                    if (b2.isPositionLegal()) {
                         v.add(move);
-                    }
+//                    }
                 }
 
 
@@ -186,9 +186,9 @@ class Pawn extends Piece {
                         && (from.getRank() == 2 || from.getRank() == 7)) {
                     Move move = new Move(new Point(from), new Point(tempPoint));
                     ChessBoard b2 = b.applyMove(move);
-                    if (b2.isPositionLegal()) {
+//                    if (b2.isPositionLegal()) {
                         v.add(move);
-                    }
+//                    }
 
                 }
             }
