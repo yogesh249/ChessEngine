@@ -154,7 +154,11 @@ class Knight extends Piece {
                 String file = String.valueOf(Character.valueOf((char) (fl + dx)));
                 int rank = from.getRank() + dy;
                 tempPoint = new Point(file, rank);
-                if (!tempPoint.onBoard()); else if (!(b.isOccupied(tempPoint))
+                if (!tempPoint.onBoard())
+                {
+                	// do nothing
+                }
+                else if (!(b.isOccupied(tempPoint))
                         || (b.getPiece(tempPoint).getColor() != getColor())) {
                     Move move = new Move(from, tempPoint);
                     v.add(move);
