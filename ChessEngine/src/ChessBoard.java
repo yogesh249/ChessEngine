@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -262,8 +264,7 @@ public class ChessBoard extends State {
 		return true;
 	}
 
-	// This function uses the current board position and the player to move
-	// is specified by the argument passed.
+	// This function uses the current board position and the player who is to be checked to be in check is passed as an argument.
 	public boolean isInCheck(boolean whosInCheck) {
 		ChessBoard b = new ChessBoard(this);
 		b.setTurn(!whosInCheck);
@@ -279,25 +280,27 @@ public class ChessBoard extends State {
 	}
 
 	public List<Move> getAllPossibleMoves() {
-		List<Move> allLegalMoves = new ArrayList<Move>();
+		// Because we are using mutliple threads to write into arraylist, we must use synchronized list.
+		List<Move> allLegalMoves = Collections.synchronizedList(new ArrayList<Move>());
 		List<Point> points = getPieces();
-		for (Point p : points) {
+		points.parallelStream().forEach(p->{
 			Piece pc = getPiece(p);
 			List<Move> possibleMoves = pc.getPossibleMoves(p, this);
 			allLegalMoves.addAll(possibleMoves);
-		}
+		});
 		return allLegalMoves;
 	}
 
 	public List<Move> getAllLegalMoves() {
-		List<Move> allLegalMoves = new ArrayList<Move>();
+		// Because we are using mutliple threads to write into arraylist, we must use synchronized list.
+		List<Move> allLegalMoves = Collections.synchronizedList(new ArrayList<Move>());
 		List<Point> points = getPieces();
-		for (Point point : points) {
+		
+		points.parallelStream().forEach(point-> {
 			Piece pc = getPiece(point);
 			List<Move> legalMoves = pc.getLegalMoves(point, this);
-//			System.out.println("Legal Moves for " + pc + ":" + point + " = " + legalMoves);
 			allLegalMoves.addAll(legalMoves);
-		}
+		});
 		return allLegalMoves;
 	}
 
@@ -334,18 +337,11 @@ public class ChessBoard extends State {
 
 	@Override
 	public boolean isGameOver() {
-
+		// Only player who has the move can get checkmated... Opponent cannot get checkmated while I have the move...It'll be an illegal position.
 		if (isMySelfCheckmated()) {
 			return true;
 		}
-
-//		ChessBoard b = new ChessBoard(this);
-//		b.setTurn(!getTurn());
-//		if(b.isMySelfCheckmated())
-//		{
-//			// If opponent checkmated
-//			return true;
-//		}
+		// Either no one is checkmated or it is a stalemate position
 		return false;
 	}
 
@@ -362,38 +358,31 @@ public class ChessBoard extends State {
 				return -1000 + depth;
 			}
 		} else {
-			if (depth == 4) {
+			if (depth == 6) {
 				int whiteMaterialCount = getWhiteMaterialCount();
 				int blackMaterialCount = getBlackMaterialCount();
-//				System.out.println("Returning maxScore : "+(whiteMaterialCount - blackMaterialCount));
 				return whiteMaterialCount - blackMaterialCount;
 			}
 		}
 		List<State> children = getChildren();
-		if (children.isEmpty()) {
+		if (children==null || children.isEmpty()) {
 
 			// No legal move move left....
 			// It might be stalemate
 			return 0;
 		}
+		Map<State, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
+		children.parallelStream().forEach(child-> {
+			int childScore = child.minimax(depth + 1);
+			scoreMap.put(child, childScore);
+		});
 		if (getTurn() == Piece.WHITE) {
 			int maxScore = -1000;
-			for (State child : children) {
-				int childScore = child.minimax(depth + 1);
-				if (childScore > maxScore) {
-					maxScore = childScore;
-				}
-			}
-
+			maxScore=Math.max(maxScore, Collections.max(scoreMap.values()));
 			return maxScore;
 		} else {
 			int minScore = 1000;
-			for (State child : children) {
-				int childScore = child.minimax(depth + 1);
-				if (childScore < minScore) {
-					minScore = childScore;
-				}
-			}
+			minScore = Math.min(minScore, Collections.min(scoreMap.values()));
 			return minScore;
 		}
 	}
