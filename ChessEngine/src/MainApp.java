@@ -20,60 +20,61 @@ public class MainApp {
 	public static void main(String args[]) {
 //		String position = "5rk1/6pp/4p3/pP1qPn2/P1pPN2b/7P/2Q2BP1/3R2K1 b";
 		System.out.println(new Date());
-		ChessBoard cb = new ChessBoard(position);
+		final ChessBoard[] cb = {new ChessBoard(position)};
 		System.out.println("After making chess board");
-		Move bestMove = null;
-		int sc = 0;
+		final Move[] bestMove = new Move[1];
+		int[] sc = {0};
 
-		while (!cb.isGameOver()) {
-			int score = 0;
-			if (cb.getTurn() == Piece.WHITE) {
-				score = -1000;
+		while (!cb[0].isGameOver()) {
+			int[] score = {0};
+			if (cb[0].getTurn() == Piece.WHITE) {
+				score[0] = -1000;
 			} else {
-				score = 1000;
+				score[0] = 1000;
 			}
 
-			List<Move> moves = cb.getAllLegalMoves();
+			List<Move> moves = cb[0].getAllLegalMoves();
 //            System.out.println(moves);
 			// Iterate over all the legal moves...
-			for (Move m : moves) {
+			moves.parallelStream().forEach(m-> {
 
 				// Evaluate only if there are more than one possible moves
 				if (moves.size() > 1) {
-					ChessBoard cb2 = new ChessBoard(cb);
-//                    System.out.print("Evaluating move " + m);
-					cb2 = cb2.applyMove(m);
-					sc = 0;
+					ChessBoard cb2 = cb[0].applyMove(m);
+					sc[0] = 0;
 //					 Initial depth we pass as zero to minimax function.
-					sc = cb2.minimax(0);
+					sc[0] = cb2.minimax(0);
 //                    System.out.println(":" + sc);
 					System.out.print(".");;
 				}
-				if (cb.getTurn() == Piece.WHITE) {
-					if (sc == 1000) {
+				if (cb[0].getTurn() == Piece.WHITE) {
+					if (sc[0] == 1000) {
 						// white is winning in this move...
-						score = sc;
-						bestMove = m;
-						break;
+						score[0] = sc[0];
+						bestMove[0] = m;
+						return;
 					}
-					if (sc >= score) {
-						score = sc;
-						bestMove = m;
+					if (sc[0] >= score[0]) {
+						score[0] = sc[0];
+						bestMove[0] = m;
 					}
 				} else {
-					if (sc <= score) {
-						score = sc;
-						bestMove = m;
+					if (sc[0] <= score[0]) {
+						score[0] = sc[0];
+						bestMove[0] = m;
 					}
-					if (sc == -1000) {
+					if (sc[0] == -1000) {
 						// Black is winning here...
-						break;
+						return;
 					}
 				}
-			}
-			System.out.println(bestMove);
-			cb = cb.applyMove(bestMove);
-			bestMove = null;
+			});
+//			System.out.println(bestMove[0]);
+			Piece pc = cb[0].getPiece(bestMove[0].from);
+			Point to = bestMove[0].to;
+			System.out.println(pc + "" +  to);
+			cb[0] = cb[0].applyMove(bestMove[0]);
+			bestMove[0] = null;
 		}
 		System.out.println(new Date());
 	}
