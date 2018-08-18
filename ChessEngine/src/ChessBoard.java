@@ -228,8 +228,10 @@ public class ChessBoard extends State {
 		if (m.from == null)
 			throw new IllegalArgumentException("Source square is empty in Move " + m);
 		ChessBoard b2 = new ChessBoard(this);
+		
+		Piece pc = this.getPiece(m.from);
 		b2.boardMap.put(m.from, null);
-		b2.boardMap.put(m.to, this.getPiece(m.from));
+		b2.boardMap.put(m.to, pc);
 		b2.setTurn(!getTurn());
 		b2.getMoves().add(m);
 		return b2;
@@ -262,11 +264,11 @@ public class ChessBoard extends State {
 
 	// This function uses the current board position and the player to move
 	// is specified by the argument passed.
-	public boolean isInCheck(boolean turn) {
+	public boolean isInCheck(boolean whosInCheck) {
 		ChessBoard b = new ChessBoard(this);
-		b.setTurn(!turn);
+		b.setTurn(!whosInCheck);
 		List<Move> possibleMoves = b.getAllPossibleMoves();
-		Point myKingPosition = findPiece(new King(turn));
+		Point myKingPosition = findPiece(new King(whosInCheck));
 		for (Move move : possibleMoves) {
 			if (move.to.equals(myKingPosition)) {
 				// My king can be captured.
@@ -293,7 +295,7 @@ public class ChessBoard extends State {
 		for (Point point : points) {
 			Piece pc = getPiece(point);
 			List<Move> legalMoves = pc.getLegalMoves(point, this);
-//                        System.out.println("Legal Moves for " + pc + ":"+ point+ " = " + legalMoves);
+//			System.out.println("Legal Moves for " + pc + ":" + point + " = " + legalMoves);
 			allLegalMoves.addAll(legalMoves);
 		}
 		return allLegalMoves;
@@ -304,7 +306,7 @@ public class ChessBoard extends State {
 		List<Move> legalMoves = getAllLegalMoves();
 		List<State> children = new ArrayList<State>();
 		for (Move m : legalMoves) {
-			ChessBoard b = new ChessBoard(this).applyMove(m);
+			ChessBoard b = this.applyMove(m);
 			children.add(b);
 		}
 		return children;
@@ -369,7 +371,7 @@ public class ChessBoard extends State {
 		}
 		List<State> children = getChildren();
 		if (children.isEmpty()) {
-			
+
 			// No legal move move left....
 			// It might be stalemate
 			return 0;
