@@ -1,4 +1,5 @@
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,27 +14,32 @@ public class MainApp {
 		this.fen = fen;
 	}
 	// This is mate in 3 in 35 sec
+    public static String position = "2K5/1r6/2k5/8/8/8/8/8 b";
 //    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
-
 //	  This is mate in 4, have solved it successfully in 10 minutes with depth 6
-	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
+//	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
 	// This is mate in 2,
 	// With depth set to 2, it took 5 minutes to solve this puzzle correctly.
 //	public static String position="2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w";
 	public static void main(String args[]) {
-//		String position = "5rk1/6pp/4p3/pP1qPn2/P1pPN2b/7P/2Q2BP1/3R2K1 b";
 		System.out.println(new Date());
+		// cb is made an array, just because we need to modify it inside a lambda expression.
+		// And this is one of the ways, we can do it.
 		final ChessBoard[] cb = {new ChessBoard(position)};
 		System.out.println("After making chess board");
-		final Move[] bestMove = new Move[1];
+		Move bestMove = null;
+		// depth is made an array, just because we need to modify it inside a lambda expression.
+		// And this is one of the ways, we can do it.
 		int[] depth= {0};
+		Double moveno=1.0;
+		int counter = 1;
 		while (!cb[0].isGameOver()) {
-			Map<Move, Integer> scoreMap = new HashMap<>();
-			int[] score = {0};
+			Map<Move, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
+			int score = 0;
 			if (cb[0].getTurn() == Piece.WHITE) {
-				score[0] = -1000;
+				score = -1000;
 			} else {
-				score[0] = 1000;
+				score = 1000;
 			}
 
 			List<Move> moves = cb[0].getAllLegalMoves();
@@ -45,48 +51,83 @@ public class MainApp {
 					// Initial depth we pass as zero to minimax function.
 					sc = cb2.minimax(depth[0]);
 					scoreMap.put(m, sc);
-					System.out.print(".");
 				}
 				
 			};
 			moves.parallelStream().forEach(c);
-			System.out.println(scoreMap);
-			System.out.println("*******************************************************************");
 			for(Move move: moves)
 			{
 				int moveScore = scoreMap.get(move);
 				if (cb[0].getTurn() == Piece.WHITE) {
 					if (moveScore == 1000) {
 						// white is winning in this move...
-						score[0] = moveScore;
-						bestMove[0] = move;
+						score = moveScore;
+						bestMove = move;
 						break;
 					}
-					if (moveScore >= score[0]) {
-						score[0] = moveScore;
-						bestMove[0] = move;
+					if (moveScore >= score) {
+						score = moveScore;
+						bestMove = move;
 					}
 				} else {
 					if (moveScore == -1000) {
 						// Black is winning here...
-						score[0] = moveScore;
-						bestMove[0] = move;
+						score = moveScore;
+						bestMove = move;
 						break;
 					}
-					if (moveScore <= score[0]) {
-						score[0] = moveScore;
-						bestMove[0] = move;
+					if (moveScore <= score) {
+						score = moveScore;
+						bestMove = move;
 					}
 				}
 				
 			}
-			Piece pc = cb[0].getPiece(bestMove[0].from);
-			Point to = bestMove[0].to;
-			System.out.println(pc + "" + bestMove[0].from +  to +":"+ score[0]);
-			cb[0] = cb[0].applyMove(bestMove[0]);
+			Piece pc = cb[0].getPiece(bestMove.from);
+			Point to = bestMove.to;
+			if(cb[0].getTurn()==Piece.WHITE)
+			{
+				
+				System.out.print(moveno.intValue() + ". " + pc + "" + bestMove.from +  to );//+":"+ score);
+			}
+			else
+			{
+				if(moveno==1.0)
+				{
+					if(position.endsWith("b"))
+					{
+						System.out.print(moveno.intValue()+". ...");
+					}
+					else
+					{
+						System.out.print("\t");
+					}
+				}
+				else
+				{
+					System.out.print("\t");
+				}
+				System.out.print(pc + "" + bestMove.from +  to +"\n" );//+":"+ score);
+			}
+				if(position.endsWith("w"))
+				{
+					if(counter%2==0) {
+						moveno=moveno+1;
+					}
+				}
+				else
+				{
+					if(counter%2==1)
+					{
+						moveno=moveno+1;
+					}
+				}
+			counter++;
+			cb[0] = cb[0].applyMove(bestMove);
 			depth[0]++;
-			bestMove[0] = null;
+			bestMove = null;
 		}
+		System.out.println();
 		System.out.println(new Date());
 	}
 }
