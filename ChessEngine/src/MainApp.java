@@ -15,7 +15,7 @@ public class MainApp {
 	// This is mate in 3 in 35 sec
 //    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
 
-//	  This is mate in 4, have solved it successfully.
+//	  This is mate in 4, have solved it successfully in 10 minutes with depth 6
 	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
 	// This is mate in 2,
 	// With depth set to 2, it took 5 minutes to solve this puzzle correctly.
@@ -67,15 +67,15 @@ public class MainApp {
 						bestMove[0] = move;
 					}
 				} else {
-					if (moveScore <= score[0]) {
-						score[0] = moveScore;
-						bestMove[0] = move;
-					}
 					if (moveScore == -1000) {
 						// Black is winning here...
 						score[0] = moveScore;
 						bestMove[0] = move;
 						break;
+					}
+					if (moveScore <= score[0]) {
+						score[0] = moveScore;
+						bestMove[0] = move;
 					}
 				}
 				
