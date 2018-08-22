@@ -322,7 +322,6 @@ public class ChessBoard extends State {
 	@Override
 	public int minimax(int depth) {
 		Boolean winner = getWinner();
-		List<State> children = getChildren();
 		if (winner != null) {
 			if (winner.equals(Piece.WHITE)) {
 				return 1000 + depth;
@@ -331,17 +330,18 @@ public class ChessBoard extends State {
 				return -1000 - depth;
 			}
 		} else {
-			if (children==null || children.isEmpty()) {
-				
-				// No legal move move left....
-				// It should be stalemate
-				return 0;
-			}
 			if (depth == 0) {
 				int whiteMaterialCount = getWhiteMaterialCount();
 				int blackMaterialCount = getBlackMaterialCount();
 				return whiteMaterialCount - blackMaterialCount;
 			}
+		}
+		List<State> children = getChildren();
+		if (children==null || children.isEmpty()) {
+
+			// No legal move move left....
+			// It should be stalemate
+			return 0;
 		}
 		Map<State, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
 		children.parallelStream().forEach(child-> {
