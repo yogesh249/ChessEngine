@@ -30,51 +30,18 @@ public class ChessBoard extends State {
 		return false;
 	}
 
-	private int getWhiteMaterialCount() {
+	private int getMaterialCount(Boolean color) {
 		ChessBoard cb = new ChessBoard(this);
-		cb.setTurn(Piece.WHITE);
-		List<Point> whitePieces = cb.getPieces();
+		cb.setTurn(color);
+		List<Point> pieces = cb.getPieces();
 		int totalValue = 0;
-		for (Point p : whitePieces) {
-			Piece whitePiece = getPiece(p);
-			if (!(whitePiece instanceof King)) {
-				totalValue = totalValue + whitePiece.getValue();
+		for (Point p : pieces) {
+			Piece piece = getPiece(p);
+			if (!(piece instanceof King)) {
+				totalValue = totalValue + piece.getValue();
 			}
 		}
 		return totalValue;
-	}
-
-	private int getBlackMaterialCount() {
-		ChessBoard cb = new ChessBoard(this);
-		cb.setTurn(Piece.BLACK);
-		List<Point> blackPieces = cb.getPieces();
-		int totalValue = 0;
-		for (Point p : blackPieces) {
-			Piece blackPiece = getPiece(p);
-			if (!(blackPiece instanceof King)) {
-				totalValue = totalValue + blackPiece.getValue();
-			}
-		}
-		return totalValue;
-	}
-
-	public int score() {
-		// if the player having the turn has no legal moves
-		// and king is in check... Then isMySelfCheckmated is true.
-		if (isMySelfCheckmated()) {
-			return -1000;
-		} else {
-			// if there is a mate in 1.
-			List<Move> legalMoves = getAllLegalMoves();
-			// For each of the legal moves, search for a mate in 1.
-			for (Move m : legalMoves) {
-				ChessBoard newBoard = this.applyMove(m);
-				if (newBoard.isMySelfCheckmated()) {
-					return 1000;
-				}
-			}
-			return 0;
-		}
 	}
 
 	public boolean isOccupied(Point tempPoint) {
@@ -331,8 +298,8 @@ public class ChessBoard extends State {
 			}
 		} else {
 			if (depth == 0) {
-				int whiteMaterialCount = getWhiteMaterialCount();
-				int blackMaterialCount = getBlackMaterialCount();
+				int whiteMaterialCount = getMaterialCount(Piece.WHITE);
+				int blackMaterialCount = getMaterialCount(Piece.BLACK);
 				return whiteMaterialCount - blackMaterialCount;
 			}
 		}
