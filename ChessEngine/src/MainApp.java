@@ -17,7 +17,7 @@ public class MainApp {
 //    public static String position = "2K5/1r6/2k5/8/8/8/8/8 b";
 //    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
 //    public static String position="rr4k1/RR6/7K/8/8/8/8/8 w";
-//	  This is mate in 4, have solved it successfully in 5 minutes with depth 6
+//	  This is mate in 4, have solved it successfully in 5 minutes 20 seconds with depth 6
 	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
 	// This is mate in 2,
 	// With depth set to 2, it took 5 minutes to solve this puzzle correctly.
@@ -56,12 +56,6 @@ public class MainApp {
 			for(Move move: moves)
 			{
 				int moveScore = scoreMap.get(move);				
-//				if (Math.abs(moveScore) >= 1000) {
-//					// white is winning in this move...
-//					score = moveScore;
-//					bestMove = move;
-//					break;
-//				}
 				if (Math.abs(moveScore) >= Math.abs(score)) {
 					score = moveScore;
 					bestMove = move;
@@ -70,7 +64,7 @@ public class MainApp {
 			}
 			Piece pc = cb[0].getPiece(bestMove.from);
 			Point to = bestMove.to;
-//			System.out.println(bestMove + " :" + scoreMap.get(bestMove));
+			System.out.println(bestMove + " :" + scoreMap.get(bestMove));
 			//##################################################################################################################
 			// This logic between hashes is just for printing the moves properly....
 			if (cb[0].getTurn() == Piece.WHITE) {
