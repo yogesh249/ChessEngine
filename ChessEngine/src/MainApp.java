@@ -8,17 +8,17 @@ import java.util.function.Consumer;
 
 public class MainApp {
 
-	String fen;
+	String fen; 
 
 	public MainApp(String fen) {
 		this.fen = fen;
 	}
 	// This is mate in 3 in 35 sec
-    public static String position = "2K5/1r6/2k5/8/8/8/8/8 b";
+//    public static String position = "2K5/1r6/2k5/8/8/8/8/8 b";
 //    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
 //    public static String position="rr4k1/RR6/7K/8/8/8/8/8 w";
-//	  This is mate in 4, have solved it successfully in 10 minutes with depth 6
-//	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
+//	  This is mate in 4, have solved it successfully in 5 minutes with depth 6
+	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
 	// This is mate in 2,
 	// With depth set to 2, it took 5 minutes to solve this puzzle correctly.
 //	public static String position="2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w";
@@ -31,7 +31,7 @@ public class MainApp {
 		Move bestMove = null;
 		// depth is made an array, just because we need to modify it inside a lambda expression.
 		// And this is one of the ways, we can do it.
-		int[] depth= {4};
+		int[] depth= {6};
 		Double moveno=1.0;
 		int counter = 1;
 		while (!cb[0].isGameOver()) {
@@ -55,34 +55,22 @@ public class MainApp {
 			moves.parallelStream().forEach(c);
 			for(Move move: moves)
 			{
-				int moveScore = scoreMap.get(move);
-				if (cb[0].getTurn() == Piece.WHITE) {
-					if (moveScore == 1000) {
-						// white is winning in this move...
-						score = moveScore;
-						bestMove = move;
-						break;
-					}
-					if (moveScore >= score) {
-						score = moveScore;
-						bestMove = move;
-					}
-				} else {
-					if (moveScore == -1000) {
-						// Black is winning here...
-						score = moveScore;
-						bestMove = move;
-						break;
-					}
-					if (moveScore <= score) {
-						score = moveScore;
-						bestMove = move;
-					}
+				int moveScore = scoreMap.get(move);				
+//				if (Math.abs(moveScore) >= 1000) {
+//					// white is winning in this move...
+//					score = moveScore;
+//					bestMove = move;
+//					break;
+//				}
+				if (Math.abs(moveScore) >= Math.abs(score)) {
+					score = moveScore;
+					bestMove = move;
 				}
 				
 			}
 			Piece pc = cb[0].getPiece(bestMove.from);
 			Point to = bestMove.to;
+//			System.out.println(bestMove + " :" + scoreMap.get(bestMove));
 			//##################################################################################################################
 			// This logic between hashes is just for printing the moves properly....
 			if (cb[0].getTurn() == Piece.WHITE) {
