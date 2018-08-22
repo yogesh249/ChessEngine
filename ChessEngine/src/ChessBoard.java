@@ -30,14 +30,9 @@ public class ChessBoard extends State {
 		return false;
 	}
 
-	public int getWhiteMaterialCount() {
+	private int getWhiteMaterialCount() {
 		ChessBoard cb = new ChessBoard(this);
-		if (getTurn() == Piece.BLACK) {
-			if (cb.isMySelfCheckmated()) {
-				return 1000;
-			}
-			cb.setTurn(Piece.WHITE);
-		}
+		cb.setTurn(Piece.WHITE);
 		List<Point> whitePieces = cb.getPieces();
 		int totalValue = 0;
 		for (Point p : whitePieces) {
@@ -49,14 +44,9 @@ public class ChessBoard extends State {
 		return totalValue;
 	}
 
-	public int getBlackMaterialCount() {
+	private int getBlackMaterialCount() {
 		ChessBoard cb = new ChessBoard(this);
-		if (getTurn() == Piece.WHITE) {
-			if (cb.isMySelfCheckmated()) {
-				return -1000;
-			}
-			cb.setTurn(Piece.BLACK);
-		}
+		cb.setTurn(Piece.BLACK);
 		List<Point> blackPieces = cb.getPieces();
 		int totalValue = 0;
 		for (Point p : blackPieces) {
@@ -305,36 +295,26 @@ public class ChessBoard extends State {
 		}
 		return children;
 	}
-
+	/**
+	 * return true, if my king has been checkmated
+	 * else return false;
+	 */
 	@Override
 	public Boolean getWinner() {
-		if (getTurn()) {
-			// White to move
-			if (isMySelfCheckmated()) {
-				// White is checkmated
-				// Black wins
-				return Piece.BLACK;
-			}
-		} else {
-			// Black to move
-			if (isMySelfCheckmated()) {
-				// Black is checkmated
-				// White wins
-				return Piece.WHITE;
-			}
+		if(isMySelfCheckmated())
+		{
+			// My king is checkmated, Opponent wins...
+			return !getTurn();
 		}
 		return null;
 	}
-
+	/**
+	 * @return true, if there is a winner in this position
+	 * else return false;
+	 */
 	@Override
 	public boolean isGameOver() {
-		// Only player who has the move can only get checkmated... 
-		// Opponent cannot get checkmated while I have the move...It'll be an illegal position.
-		if (isMySelfCheckmated()) {
-			return true;
-		}
-		// Either no one is checkmated or it is a stalemate position
-		return false;
+		return (getWinner()!=null);
 	}
 
 	// Override this method based on the your needs.
@@ -344,13 +324,13 @@ public class ChessBoard extends State {
 		Boolean winner = getWinner();
 		if (winner != null) {
 			if (winner.equals(Piece.WHITE)) {
-				return 1000 - depth;
+				return 1000 + depth;
 			}
 			if (winner.equals(Piece.BLACK)) {
-				return -1000 + depth;
+				return -1000 - depth;
 			}
 		} else {
-			if (depth == 6) {
+			if (depth == 0) {
 				int whiteMaterialCount = getWhiteMaterialCount();
 				int blackMaterialCount = getBlackMaterialCount();
 				return whiteMaterialCount - blackMaterialCount;
@@ -365,7 +345,7 @@ public class ChessBoard extends State {
 		}
 		Map<State, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
 		children.parallelStream().forEach(child-> {
-			int childScore = child.minimax(depth + 1);
+			int childScore = child.minimax(depth - 1);
 			scoreMap.put(child, childScore);
 		});
 		if (getTurn() == Piece.WHITE) {
