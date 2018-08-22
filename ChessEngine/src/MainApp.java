@@ -16,6 +16,7 @@ public class MainApp {
 	// This is mate in 3 in 35 sec
     public static String position = "2K5/1r6/2k5/8/8/8/8/8 b";
 //    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
+//    public static String position="rr4k1/RR6/7K/8/8/8/8/8 w";
 //	  This is mate in 4, have solved it successfully in 10 minutes with depth 6
 //	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
 	// This is mate in 2,
@@ -30,7 +31,7 @@ public class MainApp {
 		Move bestMove = null;
 		// depth is made an array, just because we need to modify it inside a lambda expression.
 		// And this is one of the ways, we can do it.
-		int[] depth= {0};
+		int[] depth= {4};
 		Double moveno=1.0;
 		int counter = 1;
 		while (!cb[0].isGameOver()) {
@@ -44,14 +45,11 @@ public class MainApp {
 
 			List<Move> moves = cb[0].getAllLegalMoves();
 			Consumer<Move> c = m -> {
-				int sc=0;
-				// Evaluate only if there are more than one possible moves
-				if (moves.size() >= 1) {
-					ChessBoard cb2 = cb[0].applyMove(m);
-					// Initial depth we pass as zero to minimax function.
-					sc = cb2.minimax(depth[0]);
-					scoreMap.put(m, sc);
-				}
+				int sc = 0;
+				ChessBoard cb2 = cb[0].applyMove(m);
+				// Initial depth we pass as zero to minimax function.
+				sc = cb2.minimax(depth[0]);
+				scoreMap.put(m, sc);
 				
 			};
 			moves.parallelStream().forEach(c);
@@ -85,46 +83,36 @@ public class MainApp {
 			}
 			Piece pc = cb[0].getPiece(bestMove.from);
 			Point to = bestMove.to;
-			if(cb[0].getTurn()==Piece.WHITE)
-			{
-				
-				System.out.print(moveno.intValue() + ". " + pc + "" + bestMove.from +  to );//+":"+ score);
-			}
-			else
-			{
-				if(moveno==1.0)
-				{
-					if(position.endsWith("b"))
-					{
-						System.out.print(moveno.intValue()+". ...");
-					}
-					else
-					{
+			//##################################################################################################################
+			// This logic between hashes is just for printing the moves properly....
+			if (cb[0].getTurn() == Piece.WHITE) {
+
+				System.out.print(moveno.intValue() + ". " + pc + "" + bestMove.from + to);// +":"+ score);
+			} else {
+				if (moveno == 1.0) {
+					if (position.endsWith("b")) {
+						System.out.print(moveno.intValue() + ". ...");
+					} else {
 						System.out.print("\t");
 					}
-				}
-				else
-				{
+				} else {
 					System.out.print("\t");
 				}
-				System.out.print(pc + "" + bestMove.from +  to +"\n" );//+":"+ score);
+				System.out.print(pc + "" + bestMove.from + to + "\n");// +":"+ score);
 			}
-				if(position.endsWith("w"))
-				{
-					if(counter%2==0) {
-						moveno=moveno+1;
-					}
+			if (position.endsWith("w")) {
+				if (counter % 2 == 0) {
+					moveno = moveno + 1;
 				}
-				else
-				{
-					if(counter%2==1)
-					{
-						moveno=moveno+1;
-					}
+			} else {
+				if (counter % 2 == 1) {
+					moveno = moveno + 1;
 				}
+			}
 			counter++;
+			//##################################################################################################################
 			cb[0] = cb[0].applyMove(bestMove);
-			depth[0]++;
+			depth[0]--;
 			bestMove = null;
 		}
 		System.out.println();
