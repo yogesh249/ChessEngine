@@ -24,11 +24,8 @@ public class ChessBoard extends State {
 	public boolean isMySelfCheckmated() {
 		List<Move> legalMoves = getAllLegalMoves();
 		if (legalMoves == null || legalMoves.isEmpty()) {
-			if (isInCheck(getTurn())) {
-				return true;
-			} else {
-				return false;
-			}
+			Boolean playerHavingTheMove = getTurn();
+			return isInCheck(playerHavingTheMove);
 		}
 		return false;
 	}
@@ -81,8 +78,7 @@ public class ChessBoard extends State {
 			List<Move> legalMoves = getAllLegalMoves();
 			// For each of the legal moves, search for a mate in 1.
 			for (Move m : legalMoves) {
-				ChessBoard c = new ChessBoard(this);
-				ChessBoard newBoard = c.applyMove(m);
+				ChessBoard newBoard = this.applyMove(m);
 				if (newBoard.isMySelfCheckmated()) {
 					return 1000;
 				}
@@ -240,27 +236,22 @@ public class ChessBoard extends State {
 	}
 
 	/*
-	 * This function will return true, if its WHITE's turn and blacks king is not in
-	 * check or if its BLACK's turn and white's king is not in check.
+	 * This function will return true, 
+	 * if its WHITE's turn and blacks king is not in check or
+	 * if its BLACK's turn and white's king is not in check.
 	 * 
-	 * else it will return false
+	 * else it will return false (This will be the case, if any player can capture opponent's king
 	 */
 	public boolean isPositionLegal() {
 		// Find the king of the player who doesn't have the turn....
-
-		// if black has the turn and
-		if (getTurn() == Piece.BLACK) {
-			if (isInCheck(Piece.WHITE)) {
-				// white's king is in check, then position is illegal.
-				return false;
-			}
-		} else {
-			// If white has the turn, then
-			if (isInCheck(Piece.BLACK)) {
-				// if black's king is in check, the position is illegal.
-				return false;
-			}
+		boolean opponent = !getTurn();
+		if (isInCheck(opponent)) {
+			// its my turn and opponent is in check.
+			// This can't be a legal position.
+			return false;
 		}
+		// Its my turn and my opponent is NOT in check.
+		// Hence the position is legal.
 		return true;
 	}
 
@@ -337,7 +328,8 @@ public class ChessBoard extends State {
 
 	@Override
 	public boolean isGameOver() {
-		// Only player who has the move can get checkmated... Opponent cannot get checkmated while I have the move...It'll be an illegal position.
+		// Only player who has the move can only get checkmated... 
+		// Opponent cannot get checkmated while I have the move...It'll be an illegal position.
 		if (isMySelfCheckmated()) {
 			return true;
 		}
@@ -349,12 +341,12 @@ public class ChessBoard extends State {
 	// The extending class should give its functionality, who is winning...
 	@Override
 	public int minimax(int depth) {
-
-		if (getWinner() != null) {
-			if (getWinner().equals(Piece.WHITE)) {
+		Boolean winner = getWinner();
+		if (winner != null) {
+			if (winner.equals(Piece.WHITE)) {
 				return 1000 - depth;
 			}
-			if (getWinner().equals(Piece.BLACK)) {
+			if (winner.equals(Piece.BLACK)) {
 				return -1000 + depth;
 			}
 		} else {
@@ -368,7 +360,7 @@ public class ChessBoard extends State {
 		if (children==null || children.isEmpty()) {
 
 			// No legal move move left....
-			// It might be stalemate
+			// It should be stalemate
 			return 0;
 		}
 		Map<State, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
