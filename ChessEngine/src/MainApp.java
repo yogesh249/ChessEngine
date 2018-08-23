@@ -14,12 +14,11 @@ public class MainApp {
 		this.fen = fen;
 	}
 	// This is mate in 3 in 12 sec with depth 6 (with alpha beta pruning)
-//    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
+    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
 //     Not able to solve this, with depth 12 (even with Alpha beta pruning)
 //    public static String position="rr4k1/RR6/7K/8/8/8/8/8 w";
-//	  This is mate in 4, have solved it successfully in 20 seconds with depth 6 using alpha beta pruning
-	// This is currently not evaluating mate in 4 correctly.
-	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
+//	  This is mate in 4, have solved it successfully in 46 seconds with depth 6 using alpha beta pruning
+//	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
 	// With depth set to 2, it took 25 seconds to solve this puzzle correctly (mate in 2) with alpha beta pruning
 //	public static String position="2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w";
 	public static void main(String args[]) {
@@ -36,12 +35,6 @@ public class MainApp {
 		while (!cb[0].isGameOver()) {
 			Map<Move, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
 			int score = 0;
-			if (cb[0].getTurn() == Piece.WHITE) {
-				score = -1000000;
-			} else {
-				score = 1000000;
-			}
-
 			List<Move> moves = cb[0].getAllLegalMoves();
 			moves.parallelStream().forEach(m -> {
 				int sc = 0;
@@ -49,26 +42,33 @@ public class MainApp {
 				sc = cb2.minimaxWithAlphaBeta(depth[0], alpha[0], beta[0]); 
 				scoreMap.put(m, sc);
 			});
-			for(Move move: moves)
+			if(moves!=null && moves.size()>=1)
 			{
-				int moveScore = scoreMap.get(move);		
-				if(cb[0].getTurn()==Piece.WHITE)
+				bestMove = moves.get(0);	
+				score = scoreMap.get(bestMove);
+				
+				for(Move move: moves)
 				{
-					if(moveScore >= score)
+					int moveScore = scoreMap.get(move);		
+					if(cb[0].getTurn()==Piece.WHITE)
 					{
-						score = moveScore;
-						bestMove = move;
+						if(moveScore >= score)
+						{
+							score = moveScore;
+							bestMove = move;
+						}
 					}
-				}
-				else
-				{
-					if(moveScore<=score)
+					else
 					{
-						score = moveScore;
-						bestMove = move;
+						if(moveScore<=score)
+						{
+							score = moveScore;
+							bestMove = move;
+						}
 					}
 				}
 			}
+			
 			cb[0] = cb[0].applyMove(bestMove);
 			depth[0]--;
 			bestMove = null;
