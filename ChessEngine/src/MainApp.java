@@ -14,11 +14,12 @@ public class MainApp {
 		this.fen = fen;
 	}
 	// This is mate in 3 in 12 sec with depth 6 (with alpha beta pruning)
-    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
+//    public static String position = "2k5/1R6/2K5/8/8/8/8/8 w";
 //     Not able to solve this, with depth 12 (even with Alpha beta pruning)
 //    public static String position="rr4k1/RR6/7K/8/8/8/8/8 w";
-//	  This is mate in 4, have solved it successfully in 52 seconds with depth 6 using alpha beta pruning
-//	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
+//	  This is mate in 4, have solved it successfully in 20 seconds with depth 6 using alpha beta pruning
+	// This is currently not evaluating mate in 4 correctly.
+	public static String position = "8/8/8/8/8/6P1/6k1/4KR1R w";
 	// With depth set to 2, it took 25 seconds to solve this puzzle correctly (mate in 2) with alpha beta pruning
 //	public static String position="2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w";
 	public static void main(String args[]) {
@@ -36,9 +37,9 @@ public class MainApp {
 			Map<Move, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
 			int score = 0;
 			if (cb[0].getTurn() == Piece.WHITE) {
-				score = -Integer.MAX_VALUE;
+				score = -1000000;
 			} else {
-				score = Integer.MAX_VALUE;
+				score = 1000000;
 			}
 
 			List<Move> moves = cb[0].getAllLegalMoves();
@@ -50,10 +51,22 @@ public class MainApp {
 			});
 			for(Move move: moves)
 			{
-				int moveScore = scoreMap.get(move);				
-				if (Math.abs(moveScore) >= Math.abs(score)) {
-					score = moveScore;
-					bestMove = move;
+				int moveScore = scoreMap.get(move);		
+				if(cb[0].getTurn()==Piece.WHITE)
+				{
+					if(moveScore >= score)
+					{
+						score = moveScore;
+						bestMove = move;
+					}
+				}
+				else
+				{
+					if(moveScore<=score)
+					{
+						score = moveScore;
+						bestMove = move;
+					}
 				}
 			}
 			cb[0] = cb[0].applyMove(bestMove);
