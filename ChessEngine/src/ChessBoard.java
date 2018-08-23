@@ -284,6 +284,8 @@ public class ChessBoard extends State {
 		Boolean winner = getWinner();
 		if (winner != null) {
 			if (winner.equals(Piece.WHITE)) {
+				// Do not return Integer.MAX_VALUE here... because the selection of
+				// move depends on depth value.
 				return 1000000+depth;
 			}
 			if (winner.equals(Piece.BLACK)) {
