@@ -275,26 +275,19 @@ public class ChessBoard extends State {
 		}
 		return null;
 	}
-	/**
-	 * @return true, if there is a winner in this position
-	 * else return false;
-	 */
-	@Override
-	public boolean isGameOver() {
-		return (getWinner()!=null);
-	}
+	
 
 	// Override this method based on the your needs.
 	// The extending class should give its functionality, who is winning...
 	@Override
-	public int minimax(int depth) {
+	public int minimaxWithAlphaBeta(int depth, int alpha, int beta) {
 		Boolean winner = getWinner();
 		if (winner != null) {
 			if (winner.equals(Piece.WHITE)) {
-				return 1000 + depth;
+				return Integer.MAX_VALUE;
 			}
 			if (winner.equals(Piece.BLACK)) {
-				return -1000 - depth;
+				return -Integer.MAX_VALUE;
 			}
 		} else {
 			if (depth == 0) {
@@ -310,19 +303,35 @@ public class ChessBoard extends State {
 			// It should be stalemate
 			return 0;
 		}
-		Map<State, Integer> scoreMap = Collections.synchronizedMap(new HashMap<>());
-		children.parallelStream().forEach(child-> {
-			int childScore = child.minimax(depth - 1);
-			scoreMap.put(child, childScore);
-		});
-		if (getTurn() == Piece.WHITE) {
-			int maxScore = -1000;
-			maxScore=Math.max(maxScore, Collections.max(scoreMap.values()));
-			return maxScore;
-		} else {
-			int minScore = 1000;
-			minScore = Math.min(minScore, Collections.min(scoreMap.values()));
-			return minScore;
+		
+		if(getTurn() == Piece.WHITE)
+		{
+			int bestVal = -Integer.MAX_VALUE;
+			for(State child: children)
+			{
+				int childScore = child.minimaxWithAlphaBeta(depth - 1, alpha, beta);
+				bestVal = Math.max(bestVal, childScore);
+				alpha = Math.max(alpha, bestVal);
+				if (beta <= alpha) {
+					break;
+				}
+			}
+			return bestVal;
+		}
+		else
+		{
+			int bestVal = Integer.MAX_VALUE;
+			for(State child: children)
+			{
+				int childScore = child.minimaxWithAlphaBeta(depth - 1, alpha, beta);
+				bestVal = Math.min(bestVal,  childScore);
+				 beta = Math.min( beta, bestVal);
+				 if( beta <= alpha )
+				 {
+		                break;
+				 }
+			}
+			return bestVal;
 		}
 	}
 
