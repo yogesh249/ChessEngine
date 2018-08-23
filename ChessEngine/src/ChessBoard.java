@@ -284,10 +284,10 @@ public class ChessBoard extends State {
 		Boolean winner = getWinner();
 		if (winner != null) {
 			if (winner.equals(Piece.WHITE)) {
-				return Integer.MAX_VALUE;
+				return 1000000+depth;
 			}
 			if (winner.equals(Piece.BLACK)) {
-				return -Integer.MAX_VALUE;
+				return -1000000-depth;
 			}
 		} else {
 			if (depth == 0) {
@@ -312,7 +312,8 @@ public class ChessBoard extends State {
 				int childScore = child.minimaxWithAlphaBeta(depth - 1, alpha, beta);
 				bestVal = Math.max(bestVal, childScore);
 				alpha = Math.max(alpha, bestVal);
-				if (beta <= alpha) {
+				if (alpha>=beta) {
+					// We need a break here, hence cannot use parallel streams for the loop.
 					break;
 				}
 			}
@@ -325,11 +326,11 @@ public class ChessBoard extends State {
 			{
 				int childScore = child.minimaxWithAlphaBeta(depth - 1, alpha, beta);
 				bestVal = Math.min(bestVal,  childScore);
-				 beta = Math.min( beta, bestVal);
-				 if( beta <= alpha )
-				 {
-		                break;
-				 }
+				beta = Math.min( beta, bestVal);
+				if( alpha>=beta )
+				{
+					break;
+				}
 			}
 			return bestVal;
 		}
